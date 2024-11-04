@@ -9,12 +9,12 @@
 html {
   font-family: 'Nunito', sans-serif;
   font-size: 22px;
-  color: #fff;
+  color: #000000;
 }
 
 body {
   min-height: 100vh;
-  background-color: dodgerblue;
+  background-color: #f5f0e5;
 }
 
 .App {
@@ -34,7 +34,9 @@ section {
   flex-direction: column;
   justify-content: flex-start;
   padding: 1rem;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 25px;
+  border: 2px solid #7c7c7c;
 }
 
 form {
@@ -46,7 +48,7 @@ form {
 }
 
 a, a:visited {
-  color: #fff;
+  color: #004dfc;
 }
 
 input[type="text"],
@@ -65,7 +67,17 @@ button {
 }
 
 button {
+
   padding: 0.5rem;
+  background-color: #865F20;
+  color: white;
+  font-weight: bold;
+
+
+}
+
+li {
+  list-style-type: none;
 }
 
 .instructions {
@@ -111,4 +123,30 @@ button {
 
 .line {
   display: inline-block;
+}
+
+.flexGrow {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+
+.persistCheck {
+  font-size: 0.75rem;
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.persistCheck label {
+  margin: 0;
+}
+
+[type="checkbox"] {
+  height: 20px;
+  width: 20px;
+  margin: 0 5px 2px 2px;
 }

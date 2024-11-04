@@ -11,11 +11,22 @@ using WebProject.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-Console.WriteLine("Using connection string: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<TokenProvider>();
@@ -41,10 +52,12 @@ builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             builder.Configuration.GetSection("Jwt:Secret").Value!)),
         ValidateAudience = false,
-        ValidateIssuer = false
+        ValidateIssuer = false,
+        ClockSkew = TimeSpan.Zero
     };
 });
 
@@ -53,6 +66,8 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -60,12 +75,13 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseSwagger(); // Можете залишити Swagger увімкненим для всіх середовищ
+    app.UseSwagger(); // РњРѕР¶РµС‚Рµ Р·Р°Р»РёС€РёС‚Рё Swagger СѓРІС–РјРєРЅРµРЅРёРј РґР»СЏ РІСЃС–С… СЃРµСЂРµРґРѕРІРёС‰
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // Важливо: активація аутентифікації
+app.UseCors("AllowSpecificOrigin");
+app.UseAuthentication(); // Р’Р°Р¶Р»РёРІРѕ: Р°РєС‚РёРІР°С†С–СЏ Р°СѓС‚РµРЅС‚РёС„С–РєР°С†С–С—
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,4 +1,6 @@
-﻿namespace WebProject.Server.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebProject.Server.Models
 {
     public class UserRegisterDto
     {
@@ -9,7 +11,10 @@
 
     public class UserLoginDto
     {
+        [Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; }
     }
 
