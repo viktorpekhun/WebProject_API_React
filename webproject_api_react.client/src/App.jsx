@@ -1,49 +1,41 @@
-import { useEffect, useState } from 'react';
-import './App.css';
+import {Routes, Route} from "react-router-dom";
+import Register from "@/components/Register.jsx";
+import Login from "@/components/Login.jsx";
+import Home from "@/components/Home.jsx";
+import Missing from "@/components/Missing.jsx";
+import LinkPage from "@/components/LinkPage.jsx";
+import Layout from "@/components/Layout.jsx";
+import RequireAuth from "@/components/RequireAuth.jsx";
+import Lounge from "@/components/Lounge.jsx";
+import PersistLogin from "@/components/PersistLogin.jsx";
+
+
 
 function App() {
-    const [forecasts, setForecasts] = useState();
+    return(
+        <Routes>
+            <Route path="/" element={<Layout />}>
+                {/* Redirect root to LinkPage */}
+                <Route index element={<LinkPage />} />
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
+                {/* Public routes */}
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="linkpage" element={<LinkPage />} />
 
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
+                {/* Protected routes */}
+                <Route element={<PersistLogin />}>
+                    <Route element={<RequireAuth />}>
+                        <Route path="home" element={<Home />} />
+                        <Route path="lounge" element={<Lounge />} />
+                    </Route>
+                </Route>
 
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
+                {/* Catch-all route for unmatched paths */}
+                <Route path="*" element={<Missing />} />
+            </Route>
+        </Routes>
     );
-    
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        const data = await response.json();
-        setForecasts(data);
-    }
 }
 
 export default App;
