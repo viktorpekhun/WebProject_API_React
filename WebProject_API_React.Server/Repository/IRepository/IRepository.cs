@@ -1,13 +1,13 @@
 ﻿using System.Linq.Expressions;
 
-namespace WebProject.Server.Repository.IRepository
+namespace WebProject_API_React.Server.Repository.IRepository
 {
     public interface IRepository<TEntity> where TEntity : class
     {
         Task AddAsync(TEntity entity);
         Task UpdateAsync(TEntity entity);
         Task DeleteAsync(TEntity entity);
-        Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
-        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default);
     }
 }

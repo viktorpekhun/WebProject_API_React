@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebProject.Server.Models;
-using WebProject.Server.Repository.IRepository;
-using WebProject.Server.Services;
+using WebProject_API_React.Server.Models;
+using WebProject_API_React.Server.Repository.IRepository;
+using WebProject_API_React.Server.Services;
 
-namespace WebProject.Server.Controllers
+namespace WebProject_API_React.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -68,7 +68,7 @@ namespace WebProject.Server.Controllers
                 return Ok(new TokenResponseDto
                 {
                     AccessToken = accessToken,
-                    Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
+                    Username = user.Username
                 });
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace WebProject.Server.Controllers
                 return Ok(new TokenResponseDto
                 {
                     AccessToken = accessToken,
-                    Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
+                    Username = user.Username
                 });
             }
             catch (Exception ex)
@@ -173,7 +173,10 @@ namespace WebProject.Server.Controllers
 
                 SetRefreshTokenCookie(newRefreshToken);
 
-                return Ok(new TokenResponseDto { AccessToken = newAccessToken, Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")) });
+                return Ok(new TokenResponseDto { 
+                    AccessToken = newAccessToken,
+                    Username = user.Username
+                });
             }
             catch (Exception ex)
             {

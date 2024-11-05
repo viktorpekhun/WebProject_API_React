@@ -4,10 +4,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
-using WebProject.Server.Data;
-using WebProject.Server.Repository;
-using WebProject.Server.Repository.IRepository;
-using WebProject.Server.Services;
+using WebProject_API_React.Server.Data;
+using WebProject_API_React.Server.Repository;
+using WebProject_API_React.Server.Repository.IRepository;
+using WebProject_API_React.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +29,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBackgroundTaskRepository, BackgroundTaskRepository>();
 builder.Services.AddSingleton<TokenProvider>();
+builder.Services.AddHostedService<TaskProcessingService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Configure Swagger with JWT support
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
@@ -46,7 +49,7 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-// Configure JWT Authentication
+
 builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -75,13 +78,13 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseSwagger(); // Можете залишити Swagger увімкненим для всіх середовищ
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
-app.UseAuthentication(); // Важливо: активація аутентифікації
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

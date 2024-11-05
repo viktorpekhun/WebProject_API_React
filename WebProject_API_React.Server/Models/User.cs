@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebProject.Server.Models
+namespace WebProject_API_React.Server.Models
 {
     public class User
     {

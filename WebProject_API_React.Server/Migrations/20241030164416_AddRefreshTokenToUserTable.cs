@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace WebProject.Server.Migrations
+namespace WebProject_API_React.Server.Migrations
 {
     /// <inheritdoc />
     public partial class AddRefreshTokenToUserTable : Migration

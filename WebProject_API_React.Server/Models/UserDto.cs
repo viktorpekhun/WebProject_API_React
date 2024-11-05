@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebProject.Server.Models
+namespace WebProject_API_React.Server.Models
 {
     public class UserRegisterDto
     {
@@ -27,6 +27,6 @@ namespace WebProject.Server.Models
     public class TokenResponseDto
     {
         public string AccessToken { get; set; }
-        public DateTime Expiration { get; set; }
+        public string Username { get; set; }
     }
 }
