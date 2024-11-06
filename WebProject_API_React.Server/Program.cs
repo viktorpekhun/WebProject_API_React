@@ -31,7 +31,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBackgroundTaskRepository, BackgroundTaskRepository>();
 builder.Services.AddSingleton<TokenProvider>();
+builder.Services.AddSingleton<TaskCancellationService>();
 builder.Services.AddHostedService<TaskProcessingService>();
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
