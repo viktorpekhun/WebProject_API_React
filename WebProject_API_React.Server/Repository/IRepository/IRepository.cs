@@ -9,5 +9,6 @@ namespace WebProject_API_React.Server.Repository.IRepository
         Task DeleteAsync(TEntity entity);
         Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default);
+        Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default);
     }
 }

@@ -45,5 +45,13 @@ namespace WebProject_API_React.Server.Repository
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
+        {
+            IQueryable<TEntity> query = dbSet;
+            query = query.Where(filter);
+            return await query.ToListAsync(cancellationToken);
+        }
+
+
     }
 }

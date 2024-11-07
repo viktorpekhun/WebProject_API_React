@@ -13,13 +13,16 @@ namespace WebProject_API_React.Server.Services
     public class TaskProcessingService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly TaskCancellationService _taskCancellationService;
+        private readonly TaskStatusBackgroundService _statusBackgroundService;
+        //private readonly string _serverId; // Unique identifier for each server
 
-        public TaskProcessingService(IServiceScopeFactory scopeFactory, TaskCancellationService taskCancellationService)
+        public TaskProcessingService(IServiceScopeFactory scopeFactory, TaskStatusBackgroundService statusBackgroundService)
         {
             _scopeFactory = scopeFactory;
-            _taskCancellationService = taskCancellationService;
+            _statusBackgroundService = statusBackgroundService;
+            //_serverId = GenerateServerId(); // Unique identifier based on port or other server-specific data
         }
+
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -28,17 +31,14 @@ namespace WebProject_API_React.Server.Services
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var backgroundTaskRepository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
-
                     var task = await backgroundTaskRepository.FirstOrDefaultAsync(t => t.Status == "Pending", stoppingToken);
 
                     if (task != null)
                     {
-                        
-                        // Генеруємо окремий токен для кожного завдання
-                        var taskCancellationToken = _taskCancellationService.GetCancellationToken(task.Id);
                         task.Status = "InProgress";
                         task.UpdatedAt = DateTime.Now;
-                        await backgroundTaskRepository.SaveChangesAsync(taskCancellationToken);
+                        await backgroundTaskRepository.SaveChangesAsync(stoppingToken);
+
 
                         try
                         {
@@ -47,23 +47,20 @@ namespace WebProject_API_React.Server.Services
                             {
                                 result = task.Result;
                             }
-                            task.Result = await ProcessTaskAsync(task, taskCancellationToken);
+                            task.Result = await ProcessTaskAsync(task);
 
-                            
+
                             if (task.Result.Contains("An error occurred:"))
                             {
-                                if (task.Result.Contains("The operation was canceled."))
-                                {
-                                    task.Status = "Canceled";
-                                    task.Result = result;
-                                }
-                                else
-                                {
-                                    task.Status = "Failed";
-                                    task.ErrorMessage = task.Result;
-                                    task.Result = null;
-                                }
 
+                                task.Status = "Failed";
+                                task.ErrorMessage = task.Result;
+                                task.Result = null;
+                             
+                            }
+                            else if (task.Result.Contains("Task was cancelled."))
+                            {
+                                task.Result = result;
                             }
                             else
                             {
@@ -81,94 +78,27 @@ namespace WebProject_API_React.Server.Services
                             task.UpdatedAt = DateTime.Now;
                             await backgroundTaskRepository.SaveChangesAsync(stoppingToken);
 
-                            // Видаляємо токен після завершення роботи із завданням
-                            _taskCancellationService.TokenDispose(task.Id);
                         }
+
                     }
                 }
 
-                // Пауза для відновлення після завершення завдання або в разі відсутності завдань
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
         }
 
 
-        //private async Task<string> ProcessTaskAsync(BackgroundTask task, CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        switch (task.TaskType)
-        //        {
-        //            case "FactorialCalculation":
-        //                var factorialParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
-        //                int number = factorialParameters["number"];
-        //                return await Task.Run(() => CalculateFactorial(number, cancellationToken).ToString(), cancellationToken);
-
-        //            case "Calculation":
-        //                var calculationParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
-        //                int calcNumber = calculationParameters["number"];
-        //                return await Task.Run(() => Calculation(calcNumber, cancellationToken).ToString(), cancellationToken);
-
-        //            default:
-        //                return await Task.FromResult("Unsupported task type.");
-        //        }
-        //    }
-        //    catch (TaskCanceledException)
-        //    {
-        //        return "Task was canceled.";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return $"An error occurred: {ex.Message}";
-        //    }
-        //}
-
-        //private long CalculateFactorial(int n, CancellationToken cancellationToken)
-        //{
-        //    long result = 1;
-        //    for (int i = 1; i <= n; i++)
-        //        if (cancellationToken.IsCancellationRequested)
-        //            throw new TaskCanceledException();
-        //        else
-        //            result *= i;
-        //    return result;
-        //}
-        //private long Calculation(int n, CancellationToken cancellationToken)
-        //{
-        //    long result = 1;
-
-        //    for (int i = 1; i <= n; i++)
-        //    {
-        //        for (int j = 1; j <= n; j++)
-        //        {
-        //            for (int k = 1; k <= n; k++)
-        //            {
-        //                if (cancellationToken.IsCancellationRequested)
-        //                    throw new TaskCanceledException();
-        //                else
-        //                    result += 1;
-        //            }
-        //        }
-        //    }
-
-        //    return result;
-        //}
-
-        private async Task<string> ProcessTaskAsync(BackgroundTask task, CancellationToken cancellationToken)
+        private async Task<string> ProcessTaskAsync(BackgroundTask task)
         {
             try
             {
                 switch (task.TaskType)
                 {
                     case "FactorialCalculation":
-                        var factorialParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
-                        int number = factorialParameters["number"];
-                        return await CalculateFactorialAsync(number, cancellationToken);
+                        return await CalculateFactorialAsync(task);
 
                     case "Calculation":
-                        var calculationParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
-                        int calcNumber = calculationParameters["number"];
-                        return await CalculationAsync(calcNumber, cancellationToken);
+                        return await CalculationAsync(task);
 
                     default:
                         return await Task.FromResult("Unsupported task type.");
@@ -181,21 +111,30 @@ namespace WebProject_API_React.Server.Services
 
         }
 
-        private async Task<string> CalculateFactorialAsync(int n, CancellationToken cancellationToken)
+
+
+        private async Task<string> CalculateFactorialAsync(BackgroundTask task)
         {
+            var factorialParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
+            int n = factorialParameters["number"];
             long result = 1;
             for (int i = 1; i <= n; i++)
             {
-                cancellationToken.ThrowIfCancellationRequested(); // Перевірка скасування
+                if (_statusBackgroundService.IsTaskCancelled(task.Id))
+                {
+                    task.Status = "Cancelled";
+                    return "Task was cancelled.";
+                }
                 result *= i;
 
             }
             return result.ToString();
         }
 
-        private async Task<string> CalculationAsync(int n, CancellationToken cancellationToken)
+        private async Task<string> CalculationAsync(BackgroundTask task)
         {
-
+            var calculationParameters = JsonSerializer.Deserialize<Dictionary<string, int>>(task.Parameters);
+            int n = calculationParameters["number"];
             long result = 1;
 
             for (int i = 1; i <= n; i++)
@@ -204,7 +143,11 @@ namespace WebProject_API_React.Server.Services
                 {
                     for (int k = 1; k <= n; k++)
                     {
-                        cancellationToken.ThrowIfCancellationRequested(); // Перевірка скасування
+                        if (_statusBackgroundService.IsTaskCancelled(task.Id))
+                        {
+                            task.Status = "Cancelled";
+                            return "Task was cancelled.";
+                        }
                         result += 1;
 
                     }
@@ -214,6 +157,11 @@ namespace WebProject_API_React.Server.Services
             return result.ToString();
         }
 
+        private string GenerateServerId()
+        {
+            // Example: use port or other unique identifier for this server
+            return Environment.GetEnvironmentVariable("SERVER_ID") ?? Guid.NewGuid().ToString();
+        }
 
     }
 }
