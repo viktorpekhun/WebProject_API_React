@@ -25,6 +25,7 @@ builder.Services.AddReverseProxy()
         new ClusterConfig
         {
             ClusterId = "backendCluster",
+            LoadBalancingPolicy = "RoundRobin",
             Destinations = new Dictionary<string, DestinationConfig>
             {
                 { "instance1", new DestinationConfig { Address = "https://localhost:5000" } },

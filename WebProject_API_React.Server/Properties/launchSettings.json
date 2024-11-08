@@ -28,7 +28,8 @@
       "applicationUrl": "https://localhost:7136;http://localhost:5042",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
+        "SERVER_PORT": "7136"
       }
     },
     "Instance1": {
@@ -38,7 +39,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SERVER_PORT": "5000"
       }
     },
     "Instance2": {
@@ -48,7 +50,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5001",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SERVER_PORT": "5001"
       }
     },
     "Instance3": {
@@ -58,7 +61,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5002",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SERVER_PORT": "5002"
       }
     },
     "IIS Express": {

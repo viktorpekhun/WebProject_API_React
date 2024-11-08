@@ -72,15 +72,13 @@ namespace WebProject_API_React.Server.Controllers
                 return NotFound("Task not found.");
 
             // Скасовуємо завдання, якщо воно в стані InProgress
-            //if (task.Status == "InProgress")
-            //{
-            //    var result = _taskCancellationService.CancelTask(id);
-            //    if (!result)
-            //    {
-            //        return BadRequest(new { taskId = id, message = "Cannot cancel the ongoing task." });
-            //    }
-            //}
-
+            if (task.Status == "InProgress" || task.Status == "InQueue" || task.Status == "Pending")
+            {
+                task.Status = "Cancelled";
+                task.UpdatedAt = DateTime.Now;
+                await _backgroundTaskRepository.SaveChangesAsync();
+                await Task.Delay(1000);
+            }
             // Оновлюємо статус і створюємо новий токен
             await _taskStatusBackgroundService.RestartTaskAsync(task);
 
