@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using WebProject_API_React.Server.Repository.IRepository;
+﻿using WebProject_API_React.Server.Repository.IRepository;
 using WebProject_API_React.Server.Models;
 using System.Text.Json;
 using System.Collections.Concurrent;
@@ -27,31 +22,26 @@ namespace WebProject_API_React.Server.Services
             _configuration = configuration;
 
             var logsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-            Directory.CreateDirectory(logsDirectory); // Створює папку `Logs`, якщо її не існує
+            Directory.CreateDirectory(logsDirectory);
             _logFilePath = Path.Combine(logsDirectory, "task_log.txt");
         }
 
         private async Task LogTaskInfo(string taskId, string taskStatus)
         {
-            // Отримуємо `applicationUrl`
             var port = _configuration.GetValue<string>("SERVER_PORT") ?? "Unknown port";
 
-            // Записуємо в файл інформацію про завдання
             await File.AppendAllTextAsync(_logFilePath,
                 $"Task ID: {taskId}, Status: {taskStatus}, Port: {port}, Timestamp: {DateTime.Now}{Environment.NewLine}");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Запускаємо паралельно два завдання для пошуку нових задач та обробки черги
             var searchTasksTask = SearchTasksInQueueAsync(stoppingToken);
             var processTasksTask = ProcessTasksInQueueAsync(stoppingToken);
 
-            // Чекаємо завершення будь-якого з двох завдань
             await Task.WhenAny(searchTasksTask, processTasksTask);
         }
 
-        // Метод для постійного пошуку нових завдань і додавання їх у чергу
         private async Task SearchTasksInQueueAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -60,7 +50,6 @@ namespace WebProject_API_React.Server.Services
                 {
                     var backgroundTaskRepository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
-                    // Знаходимо нові завдання зі статусом "Pending" і додаємо їх у чергу
                     var pendingTasks = await backgroundTaskRepository.GetListAsync(
                         t => t.Status == "Pending" && !_taskQueue.Contains(t), stoppingToken);
 
@@ -78,14 +67,12 @@ namespace WebProject_API_React.Server.Services
             }
         }
 
-        // Метод для обробки задач у черзі
         private async Task ProcessTasksInQueueAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 var tasksToProcess = new List<BackgroundTask>();
 
-                // Забираємо всі задачі з черги
                 while (_taskQueue.TryDequeue(out var task))
                 {
                     tasksToProcess.Add(task);
@@ -97,12 +84,11 @@ namespace WebProject_API_React.Server.Services
 
                     foreach (var task in tasksToProcess)
                     {
-                        // Використовуємо семафор для обмеження кількості одночасних завдань
-                        await _semaphore.WaitAsync(stoppingToken); // Чекаємо на доступ до семафора
+
+                        await _semaphore.WaitAsync(stoppingToken);
 
                         var processingTask = ProcessSingleTask(task, stoppingToken).ContinueWith(t =>
                         {
-                            // Випускаємо семафор після завершення кожного завдання
                             _semaphore.Release();
                         });
 
@@ -111,17 +97,14 @@ namespace WebProject_API_React.Server.Services
 
                     try
                     {
-                        // Чекаємо завершення всіх оброблених завдань
                         Task.WhenAll(processingTasks);
                     }
                     catch (Exception ex)
                     {
-                        // Логування будь-яких винятків
                         Console.WriteLine($"Error during task processing: {ex.Message}");
                     }
                 }
 
-                // Затримка для уникнення високого навантаження, якщо черга порожня
                 await Task.Delay(100, stoppingToken);
             }
         }
@@ -134,11 +117,10 @@ namespace WebProject_API_React.Server.Services
             {
                 var backgroundTaskRepository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
-                // Оновіть інформацію про завдання з бази перед збереженням
                 var dbTask = await backgroundTaskRepository.FirstOrDefaultAsync(u => u.Id == task.Id, stoppingToken);
                 if (dbTask == null || dbTask.Status == "Cancelled")
                 {
-                    return; // Завдання могло бути видалене або скасоване
+                    return;
                 }
 
                 dbTask.Status = "InProgress";
@@ -166,6 +148,7 @@ namespace WebProject_API_React.Server.Services
                     else
                     {
                         dbTask.Status = "Completed";
+                        dbTask.Result = task.Result;
                     }
                 }
                 catch (Exception ex)
@@ -216,7 +199,6 @@ namespace WebProject_API_React.Server.Services
 
             for (int i = 1; i <= n; i++)
             {
-                // Перевіряємо, чи завдання було скасовано
                 if (_statusBackgroundService.IsTaskCancelled(task.Id))
                 {
                     task.Status = "Cancelled";
@@ -225,8 +207,7 @@ namespace WebProject_API_React.Server.Services
 
                 result *= i;
 
-                // Імітуємо асинхронну операцію для ітерації
-                
+
             }
             await Task.Delay(1);
             return result.ToString();
@@ -249,10 +230,7 @@ namespace WebProject_API_React.Server.Services
                             task.Status = "Cancelled";
                             return "Task was cancelled.";
                         }
-
                         result += 1;
-
-                        // Імітуємо асинхронну операцію для кожного вкладеного циклу
                         
                     }
                 }

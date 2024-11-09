@@ -5,11 +5,10 @@ using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Додаємо підтримку логування
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // Вивід логів у консоль
+builder.Logging.AddConsole();
 
-// Налаштування проксі
+
 builder.Services.AddReverseProxy()
     .LoadFromMemory(new[]
     {

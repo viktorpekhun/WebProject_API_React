@@ -27,6 +27,6 @@ namespace WebProject_API_React.Server.Models
     public class TokenResponseDto
     {
         public string AccessToken { get; set; }
-        public string Username { get; set; }
+
     }
 }
