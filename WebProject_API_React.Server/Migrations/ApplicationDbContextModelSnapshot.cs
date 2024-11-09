@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WebProject.Server.Data;
+using WebProject_API_React.Server.Data;
 
 #nullable disable
 
-namespace WebProject.Server.Migrations
+namespace WebProject_API_React.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,49 @@ namespace WebProject.Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("WebProject.Server.Models.User", b =>
+            modelBuilder.Entity("WebProject_API_React.Server.Models.BackgroundTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Parameters")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Result")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaskType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BackgroundTasks");
+                });
+
+            modelBuilder.Entity("WebProject_API_React.Server.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +104,7 @@ namespace WebProject.Server.Migrations
                             Email = "myemail1@gmail.com",
                             Password = "password1",
                             RefreshToken = "token",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 18, 44, 16, 302, DateTimeKind.Utc).AddTicks(5169),
+                            RefreshTokenExpiryTime = new DateTime(2024, 11, 5, 23, 12, 11, 991, DateTimeKind.Utc).AddTicks(9135),
                             Username = "Bob"
                         },
                         new
@@ -71,7 +113,7 @@ namespace WebProject.Server.Migrations
                             Email = "myemail2@gmail.com",
                             Password = "password2",
                             RefreshToken = "token",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 18, 44, 16, 302, DateTimeKind.Utc).AddTicks(5174),
+                            RefreshTokenExpiryTime = new DateTime(2024, 11, 5, 23, 12, 11, 991, DateTimeKind.Utc).AddTicks(9140),
                             Username = "Rick"
                         },
                         new
@@ -80,9 +122,20 @@ namespace WebProject.Server.Migrations
                             Email = "myemail3@gmail.com",
                             Password = "password3",
                             RefreshToken = "token",
-                            RefreshTokenExpiryTime = new DateTime(2024, 10, 30, 18, 44, 16, 302, DateTimeKind.Utc).AddTicks(5176),
+                            RefreshTokenExpiryTime = new DateTime(2024, 11, 5, 23, 12, 11, 991, DateTimeKind.Utc).AddTicks(9142),
                             Username = "John"
                         });
+                });
+
+            modelBuilder.Entity("WebProject_API_React.Server.Models.BackgroundTask", b =>
+                {
+                    b.HasOne("WebProject_API_React.Server.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

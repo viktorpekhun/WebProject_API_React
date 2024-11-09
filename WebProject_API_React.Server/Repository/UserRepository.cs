@@ -1,9 +1,9 @@
 ﻿using System;
-using WebProject.Server.Data;
-using WebProject.Server.Models;
-using WebProject.Server.Repository.IRepository;
+using WebProject_API_React.Server.Data;
+using WebProject_API_React.Server.Models;
+using WebProject_API_React.Server.Repository.IRepository;
 
-namespace WebProject.Server.Repository
+namespace WebProject_API_React.Server.Repository
 {
     public class UserRepository : Repository<User>, IUserRepository
     {

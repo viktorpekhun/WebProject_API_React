@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebProject.Server.Models;
-using WebProject.Server.Repository.IRepository;
-using WebProject.Server.Services;
+using WebProject_API_React.Server.Models;
+using WebProject_API_React.Server.Repository.IRepository;
+using WebProject_API_React.Server.Services;
 
-namespace WebProject.Server.Controllers
+namespace WebProject_API_React.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -38,7 +38,6 @@ namespace WebProject.Server.Controllers
         {
             try
             {
-                // Перевірка, чи існує користувач з таким email
                 var existingUser = await _userRepository.FirstOrDefaultAsync(u => u.Email == request.Email);
                 if (existingUser != null)
                 {
@@ -68,7 +67,7 @@ namespace WebProject.Server.Controllers
                 return Ok(new TokenResponseDto
                 {
                     AccessToken = accessToken,
-                    Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
+                    
                 });
             }
             catch (Exception ex)
@@ -107,7 +106,7 @@ namespace WebProject.Server.Controllers
                 return Ok(new TokenResponseDto
                 {
                     AccessToken = accessToken,
-                    Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes"))
+                    
                 });
             }
             catch (Exception ex)
@@ -127,23 +126,21 @@ namespace WebProject.Server.Controllers
 
             if (refreshToken != null)
             {
-                // Знаходимо користувача за токеном і видаляємо його
                 var user = await _userRepository.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
                 if (user != null)
                 {
-                    user.RefreshToken = ""; // Очищаємо токен
+                    user.RefreshToken = "";
                     user.RefreshTokenExpiryTime = DateTime.MinValue;
                     await _userRepository.UpdateAsync(user);
                 }
             }
 
-            // Очищуємо кукі з refreshToken
             Response.Cookies.Append("refreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.Now.AddDays(-1) // Видаляє кукі
+                Expires = DateTime.Now.AddDays(-1)
             });
 
             return Ok(new { message = "Logged out successfully" });
@@ -173,7 +170,9 @@ namespace WebProject.Server.Controllers
 
                 SetRefreshTokenCookie(newRefreshToken);
 
-                return Ok(new TokenResponseDto { AccessToken = newAccessToken, Expiration = DateTime.Now.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")) });
+                return Ok(new TokenResponseDto { 
+                    AccessToken = newAccessToken,
+                });
             }
             catch (Exception ex)
             {

@@ -5,11 +5,10 @@ using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Додаємо підтримку логування
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // Вивід логів у консоль
+builder.Logging.AddConsole();
 
-// Налаштування проксі
+
 builder.Services.AddReverseProxy()
     .LoadFromMemory(new[]
     {
@@ -25,6 +24,7 @@ builder.Services.AddReverseProxy()
         new ClusterConfig
         {
             ClusterId = "backendCluster",
+            LoadBalancingPolicy = "RoundRobin",
             Destinations = new Dictionary<string, DestinationConfig>
             {
                 { "instance1", new DestinationConfig { Address = "https://localhost:5000" } },

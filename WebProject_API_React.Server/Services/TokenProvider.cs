@@ -3,9 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using WebProject.Server.Models;
+using WebProject_API_React.Server.Models;
 
-namespace WebProject.Server.Services
+namespace WebProject_API_React.Server.Services
 {
     public class TokenProvider
     {

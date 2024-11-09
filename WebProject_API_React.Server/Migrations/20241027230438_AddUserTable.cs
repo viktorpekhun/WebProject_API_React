@@ -4,7 +4,7 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace WebProject.Server.Migrations
+namespace WebProject_API_React.Server.Migrations
 {
     /// <inheritdoc />
     public partial class AddUserTable : Migration

@@ -1,6 +1,6 @@
-﻿using WebProject.Server.Models;
+﻿using WebProject_API_React.Server.Models;
 
-namespace WebProject.Server.Repository.IRepository
+namespace WebProject_API_React.Server.Repository.IRepository
 {
     public interface IUserRepository : IRepository<User>
     {

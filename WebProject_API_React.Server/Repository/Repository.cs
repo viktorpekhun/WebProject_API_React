@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using WebProject.Server.Repository.IRepository;
-using WebProject.Server.Data;
+using WebProject_API_React.Server.Repository.IRepository;
+using WebProject_API_React.Server.Data;
 
-namespace WebProject.Server.Repository
+namespace WebProject_API_React.Server.Repository
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
@@ -32,17 +32,24 @@ namespace WebProject.Server.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             IQueryable<TEntity> query = dbSet;
-            return query.ToList();
+            return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
+        public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
         {
             IQueryable<TEntity> query = dbSet;
             query = query.Where(filter);
-            return query.FirstOrDefault();
+            return await query.FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
+        {
+            IQueryable<TEntity> query = dbSet;
+            query = query.Where(filter);
+            return await query.ToListAsync(cancellationToken);
         }
 
 

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WebProject.Server.Data;
+using WebProject_API_React.Server.Data;
 
 #nullable disable
 
-namespace WebProject.Server.Migrations
+namespace WebProject_API_React.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20241027230438_AddUserTable")]
